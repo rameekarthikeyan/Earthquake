@@ -1,0 +1,28 @@
+library(shiny)
+library(maps)
+library(mapproj)
+eqdata <- read.csv("data/Earthquake.cvs")
+mapp <- data.frame("v1" = c("Eastern","Western","Northern","Southern"), "v2"=c("longitude>=0","longitude<0","latitude>=0", "latitude<0"))
+
+shinyServer(
+  function(input,output){
+    output$oslider1 <- renderPrint({input$slider1})
+    output$oradio1 <- renderText({input$radio1})
+    rs <-reactive({mapp[mapp$v1 == input$radio1,]})
+    extext <- reactive({levels(rs()$v2)[rs()$v2]})
+    subdat <- reactive({subset(eqdata, eval(parse(text = extext())))})
+    gt <- reactive({max(subdat()$mag)})
+    output$otext1 <- renderText({nrow(subdat()[subdat()$mag>=input$slider1,])})
+    output$otext2 <- renderText({gt()})
+    gtpl <- reactive({subdat()[which.max(subdat()$mag),][,]})
+    pl <- reactive({subdat()[which.max(subdat()$mag),]$place})
+    tn <- reactive({levels(pl())[pl()]})
+    scalst <- reactive({subdat()[subdat()$mag>=input$slider1,][,]})
+    output$otext3 <- renderText({tn()})
+output$plotmap <- renderPlot({map()
+                              points(scalst()$longitude, scalst()$latitude, col=2, pch=18)
+                              points(gtpl()$longitude,gtpl()$latitude, col = "darkgreen", pch = 17, cex = 2.5)
+                              })
+output$plothist <- renderPlot({hist(scalst()$mag, xlab="Magnitude of Earthquakes", col="green", main ="Histogram")})
+
+  })
