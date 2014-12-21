@@ -1,7 +1,7 @@
 library(shiny)
 library(maps)
 library(mapproj)
-eqdata <- read.csv("data/Earthquake.cvs")
+eqdata <- read.csv("data/Earthquake.csv")
 mapp <- data.frame("v1" = c("Eastern","Western","Northern","Southern"), "v2"=c("longitude>=0","longitude<0","latitude>=0", "latitude<0"))
 
 shinyServer(
